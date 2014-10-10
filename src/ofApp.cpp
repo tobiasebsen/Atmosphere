@@ -29,24 +29,33 @@ void ofApp::setup(){
         label->setPadding(8);
         inputs->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     }
+    filter = inputs->addMinimalSlider("filter", 0., 20000., 500.);
+    range = inputs->addRangeSlider("range", 0., 20000., 800., 5000.);
+    inputs->addLabelButton("calibrate", false);
     inputs->autoSizeToFitWidgets();
+    ofAddListener(inputs->newGUIEvent, this, &ofApp::uiEvent);
+    inputs->loadSettings("inputs.xml");
     
     for (int i=0; i<10; i++) {
         distance[i] = 80000;
         value[i] = 0;
+        calibration[0] = 0;
     }
 
     settings = new ofxUISuperCanvas("SETTINGS", 240., 20., 200., 200.);
     settings->addLabelButton("poll", false);
-    range = settings->addRangeSlider("range", 0., 20000., 800., 5000.);
     size = settings->addMinimalSlider("size", 1., 60., 60.);
     fade = settings->addMinimalSlider("fade", 0., 255., 16.);
     falloff = settings->addMinimalSlider("falloff", 0., 0.99, 0.8);
-    filter = settings->addMinimalSlider("filter", 0., 20000., 500.);
     spectrum.loadImage("spectrum.png");
     sampler = settings->addImageSampler("color", &spectrum, 200., 100.);
+    saturation = settings->addMinimalSlider("saturation", 0.2, 1., 0.5);
+    brightness = settings->addMinimalSlider("brightness", 0., 0.6, 0.5);
     rainbow = settings->addToggle("rainbow", true);
     rbspeed = settings->addMinimalSlider("rbspeed", 0.0001, 0.01, 0.03);
+    spiral = settings->addToggle("spiral", true);
+    sspeed = settings->addMinimalSlider("sspeed", 0.01, 0.8, 0.03);
+    baseline = settings->addToggle("baseline", false);
     settings->autoSizeToFitWidgets();
     ofAddListener(settings->newGUIEvent, this, &ofApp::uiEvent);
     settings->loadSettings("settings.xml");
@@ -76,6 +85,7 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::exit() {
 
+    inputs->saveSettings("inputs.xml");
     settings->saveSettings("settings.xml");
     server->saveSettings("server.xml");
 }
@@ -106,22 +116,32 @@ void ofApp::update(){
         if (abs(d - history[b]) < filter) {
             distance[b] = d;
             time[b] = now;
+            history[b] = d;
         }
-        history[b] = d;
+        else
+            history[b] = history[b] * 0.2 + d * 0.8;
         
         ((ofxUISlider*)inputs->getWidget("distance" + ofToString(b+1)))->setValue(distance[b]);
         i++;
     }
     
+    bool bonus = false;
     for (int i=0; i<10; i++) {
         
-        float n = ofMap(distance[i], low, high, 0, 1.);
+        float n = ofMap(distance[i] - calibration[i], low, high, 0, 1.);
+        if (n < 0) bonus = true;
         n = ofClamp(n, 0, 1.);
 
         if (n < value[i])
             value[i] = n;
         else
             value[i] = value[i] * down + (1-down) * n;
+    }
+    
+    if (bonus) {
+        for (int i=0; i<10; i++) {
+            value[i] = 0;
+        }
     }
     
 
@@ -131,12 +151,22 @@ void ofApp::update(){
     ofSetColor(0, 0, 0, fade);
     ofRect(0, 0, fbo.getWidth(), fbo.getHeight());
     
-    ofSetColor(sampler->getColor());
+    ofColor color = sampler->getColor();
+    color.setSaturation(saturation->getValue()*255);
+    color.setBrightness(brightness->getValue()*255);
+    ofSetColor(color);
     
-    int n = (ofGetFrameNum() >> 2) % 4;
-    
-    for (int i=0; i<10; i++) {
-        ofRect(value[i]*60, i*4, size, 4);
+    if (spiral->getValue()) {
+        int n = (int)(ofGetFrameNum() * sspeed->getValue()) % 4;
+        for (int i=0; i<10; i++) {
+            ofRect(value[i]*60, i*4+n, size, 1);
+        }
+    }
+    else {
+        int b = baseline->getValue() ? 59 : 60;
+        for (int i=0; i<10; i++) {
+            ofRect(value[i]*b, i*4, size, 4);
+        }
     }
     
     fbo.readToPixels(pixels);
@@ -205,6 +235,19 @@ void ofApp::threadedFunction() {
 //--------------------------------------------------------------
 void ofApp::uiEvent(ofxUIEventArgs &args) {
 
+    /*if (args.getName() == "calibrate" && args.getButton()->getValue()) {
+        int min = INT32_MAX;
+        int max = 0;
+        for (int i=0; i<10; i++) {
+            if (distance[i] < min)
+                min = distance[i];
+            if (distance[i] > max)
+                max = distance[i];
+        }
+        for (int i=0; i<10; i++) {
+            calibration[i] = distance[i] - min;
+        }
+    }*/
     if (args.getName() == "poll") {
         artnet.sendPoll();
     }

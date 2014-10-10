@@ -2,24 +2,18 @@
     <Kind>40</Kind>
     <Name>OFX_UI_WIDGET_CANVAS</Name>
     <IsMinified>0</IsMinified>
-    <XPosition>291.000000000</XPosition>
-    <YPosition>20.000000000</YPosition>
+    <XPosition>287.000000000</XPosition>
+    <YPosition>19.000000000</YPosition>
 </Canvas>
-<Widget>
-    <Kind>6</Kind>
-    <Name>range</Name>
-    <HighValue>14270.833984375</HighValue>
-    <LowValue>6718.750000000</LowValue>
-</Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>size</Name>
-    <Value>8.682291031</Value>
+    <Value>9.296875000</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>fade</Name>
-    <Value>38.515625000</Value>
+    <Value>35.859375000</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
@@ -27,27 +21,47 @@
     <Value>0.969375014</Value>
 </Widget>
 <Widget>
-    <Kind>25</Kind>
-    <Name>filter</Name>
-    <Value>1979.166748047</Value>
-</Widget>
-<Widget>
     <Kind>28</Kind>
     <Name>color</Name>
-    <XValue>0.653917551</XValue>
+    <XValue>0.789864719</XValue>
     <YValue>0.050000001</YValue>
-    <RColor>0</RColor>
+    <RColor>199</RColor>
     <GColor>255</GColor>
-    <BColor>6</BColor>
+    <BColor>0</BColor>
     <AColor>255</AColor>
+</Widget>
+<Widget>
+    <Kind>25</Kind>
+    <Name>saturation</Name>
+    <Value>0.608333349</Value>
+</Widget>
+<Widget>
+    <Kind>25</Kind>
+    <Name>brightness</Name>
+    <Value>0.600000024</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
     <Name>rainbow</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>rbspeed</Name>
-    <Value>0.003812500</Value>
+    <Value>0.000357812</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>spiral</Name>
+    <Value>0</Value>
+</Widget>
+<Widget>
+    <Kind>25</Kind>
+    <Name>sspeed</Name>
+    <Value>0.174583331</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>baseline</Name>
+    <Value>1</Value>
 </Widget>

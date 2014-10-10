@@ -33,15 +33,19 @@ public:
     ofxUISlider *filter;
     ofxUIImageSampler *sampler;
     ofImage spectrum;
+    ofxUISlider *saturation;
+    ofxUISlider *brightness;
     ofxUIToggle *rainbow;
     ofxUISlider *rbspeed;
     ofxUIToggle *spiral;
     ofxUISlider *sspeed;
+    ofxUIToggle *baseline;
     
     ofxUISuperCanvas *server;
     
     int history[10];
     int distance[10];
+    int calibration[10];
     float value[10];
     unsigned long long time[10];
     ofFbo fbo;
