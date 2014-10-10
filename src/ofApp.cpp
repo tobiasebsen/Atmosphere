@@ -1,32 +1,54 @@
 #include "ofApp.h"
+#include <stdlib.h>
 
 //--------------------------------------------------------------
 void ofApp::setup(){
     
     ofBackground(40);
-    ofSetFrameRate(30);
+    ofSetFrameRate(60);
 
     osc.setup(9999);
     
     vector<ofxArtNetInterface> interfaces;
     ofxArtNetInterface::getInterfaces(interfaces);
-    artnet.init(interfaces[interfaces.size()-1].ip);
+    if (interfaces.size() > 0)
+        artnet.init(interfaces[interfaces.size()-1].ip, false);
     artnet.setNodeType(ARTNET_TYPE_RAW);
+    artnet.setBroadcastLimit(30);
+    ofAddListener(artnet.pollReply, this, &ofApp::artnetPollReply);
     artnet.start();
+    artnet.sendPoll();
     
     inputs = new ofxUISuperCanvas("INPUTS", 20., 20., 200., 200.);
-    for (int i=0; i<10; i++)
-        inputs->addMinimalSlider("distance" + ofToString(i+1), 0., 10000., 0.);
+    for (int i=0; i<10; i++) {
+        inputs->addMinimalSlider("distance" + ofToString(i+1), 0., 20000., 0., 100., 8.);
+        inputs->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+        ofxUILabel* label = inputs->addLabel("fps" + ofToString(i+1), "0");
+        ofxUIRectangle* rect = label->getRect();
+        label->setFont(inputs->getFontSmall());
+        label->setPadding(8);
+        inputs->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    }
     inputs->autoSizeToFitWidgets();
     
+    for (int i=0; i<10; i++) {
+        distance[i] = 80000;
+        value[i] = 0;
+    }
+
     settings = new ofxUISuperCanvas("SETTINGS", 240., 20., 200., 200.);
-    range = settings->addRangeSlider("range", 0., 10000., 800., 5000.);
+    settings->addLabelButton("poll", false);
+    range = settings->addRangeSlider("range", 0., 20000., 800., 5000.);
     size = settings->addMinimalSlider("size", 1., 60., 60.);
     fade = settings->addMinimalSlider("fade", 0., 255., 16.);
-    falloff = settings->addMinimalSlider("falloff", 0., 0.5, 0.1);
+    falloff = settings->addMinimalSlider("falloff", 0., 0.99, 0.8);
+    filter = settings->addMinimalSlider("filter", 0., 20000., 500.);
     spectrum.loadImage("spectrum.png");
     sampler = settings->addImageSampler("color", &spectrum, 200., 100.);
+    rainbow = settings->addToggle("rainbow", true);
+    rbspeed = settings->addMinimalSlider("rbspeed", 0.0001, 0.01, 0.03);
     settings->autoSizeToFitWidgets();
+    ofAddListener(settings->newGUIEvent, this, &ofApp::uiEvent);
     settings->loadSettings("settings.xml");
     
     server = new ofxUISuperCanvas("SERVER", 480., 20., 200., 200.);
@@ -48,6 +70,7 @@ void ofApp::setup(){
     ofClear(0);
     fbo.end();
     pixels.allocate(60, 40, OF_PIXELS_RGB);
+    
 }
 
 //--------------------------------------------------------------
@@ -65,42 +88,72 @@ void ofApp::update(){
     float high = range->getValueHigh();
     int size = this->size->getValue();
     int fade = this->fade->getValue();
+    int filter = this->filter->getValue();
+    unsigned long long now = ofGetElapsedTimeMillis();
 
-    distance[0] = (high + 20) * down + distance[0] * (1-down);
-
-    if (osc.hasWaitingMessages()) {
+    for (int i=0; i<10; i++)
+        ((ofxUILabel*)inputs->getWidget("fps" + ofToString(i+1)))->setLabel(ofToString(now - time[i],2));
+    
+    int i = 0;
+    while (osc.hasWaitingMessages()) {
         
         ofxOscMessage msg;
         osc.getNextMessage(&msg);
         
-        int d = msg.getArgAsInt32(0);
-        if (d < distance[0])
-            distance[0] = d;
+        int b = msg.getArgAsInt32(0) / 2;
+        int d = msg.getArgAsInt32(1);
         
-        ((ofxUISlider*)inputs->getWidget("distance1"))->setValue(distance[0]);
+        if (abs(d - history[b]) < filter) {
+            distance[b] = d;
+            time[b] = now;
+        }
+        history[b] = d;
+        
+        ((ofxUISlider*)inputs->getWidget("distance" + ofToString(b+1)))->setValue(distance[b]);
+        i++;
+    }
+    
+    for (int i=0; i<10; i++) {
+        
+        float n = ofMap(distance[i], low, high, 0, 1.);
+        n = ofClamp(n, 0, 1.);
+
+        if (n < value[i])
+            value[i] = n;
+        else
+            value[i] = value[i] * down + (1-down) * n;
     }
     
 
     fbo.begin();
     ofEnableAlphaBlending();
+    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
     ofSetColor(0, 0, 0, fade);
     ofRect(0, 0, fbo.getWidth(), fbo.getHeight());
     
     ofSetColor(sampler->getColor());
     
-    for (int i=0; i<1; i++) {
-
-        int n = ofMap(distance[i], low, high, 0, 60);
-        n = ofClamp(n, 0, 60);
-        ofRect(n, i*4, size, 4);
+    int n = (ofGetFrameNum() >> 2) % 4;
+    
+    for (int i=0; i<10; i++) {
+        ofRect(value[i]*60, i*4, size, 4);
     }
     
     fbo.readToPixels(pixels);
     fbo.end();
     
     // TODO: send to all
-    artnet.sendDmxRaw(0, pixels.getPixels(), fbo.getWidth()*3*2);
-    artnet.sendDmxRaw(1, pixels.getPixels()+360, fbo.getWidth()*3*2);
+    for (int i=9; i>=0; i--) {
+        artnet.sendDmxRaw(i*2+0, pixels.getPixels()+i*720, fbo.getWidth()*3*2);
+        artnet.sendDmxRaw(i*2+1, pixels.getPixels()+i*720+360, fbo.getWidth()*3*2);
+    }
+    
+    if (rainbow->getValue()) {
+        ofPoint p = sampler->getValue();
+        p.x += rbspeed->getValue();
+        if (p.x > 1) p.x -= 1;
+        sampler->setValue(p);
+    }
     
     ((ofxUILabel*)server->getWidget("status"))->setLabel(client.isConnected() ? "status: connected" : "status: disconnected");
 }
@@ -110,7 +163,7 @@ void ofApp::draw(){
     
     ofPushMatrix();
     ofRotateZ(-90);
-    ofTranslate(-320, 20);
+    ofTranslate(-420, 20);
     fbo.getTextureReference().setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
     fbo.draw(0, 0, -60*4, 40*16);
     ofPopMatrix();
@@ -124,11 +177,19 @@ void ofApp::threadedFunction() {
 
         if (client.isConnected()) {
 
-            string msg;
-            for (int i=0; i<10; i++) {
-                msg += ofToString(i) + ":" + ofToString(distance[i]) + "\n";
+            if (((ofxUIRadio*)server->getWidget("direction"))->getActiveName() == "send") {
+                string msg;
+                for (int i=0; i<10; i++) {
+                    msg += ofToString(i) + ":" + ofToString(distance[i]) + "\n";
+                }
+                client.send(msg);
             }
-            client.send(msg);
+            if (((ofxUIRadio*)server->getWidget("direction"))->getActiveName() == "receive") {
+                
+                string msg = client.receive();
+                
+            }            
+            
         }
         else {
             
@@ -144,6 +205,9 @@ void ofApp::threadedFunction() {
 //--------------------------------------------------------------
 void ofApp::uiEvent(ofxUIEventArgs &args) {
 
+    if (args.getName() == "poll") {
+        artnet.sendPoll();
+    }
     if (args.getName() == "connect") {
 
         if (args.getToggle()->getValue())
@@ -151,4 +215,9 @@ void ofApp::uiEvent(ofxUIEventArgs &args) {
         else
             this->stopThread();
     }
+}
+
+void ofApp::artnetPollReply(ofxArtNetNodeEntry *&node) {
+
+    ofLogNotice() << node->getIp();
 }

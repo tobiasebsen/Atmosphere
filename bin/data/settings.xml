@@ -8,31 +8,46 @@
 <Widget>
     <Kind>6</Kind>
     <Name>range</Name>
-    <HighValue>7812.500000000</HighValue>
-    <LowValue>800.000000000</LowValue>
+    <HighValue>14270.833984375</HighValue>
+    <LowValue>6718.750000000</LowValue>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>size</Name>
-    <Value>13.906250000</Value>
+    <Value>8.682291031</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>fade</Name>
-    <Value>45.156250000</Value>
+    <Value>38.515625000</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>falloff</Name>
-    <Value>0.070312500</Value>
+    <Value>0.969375014</Value>
+</Widget>
+<Widget>
+    <Kind>25</Kind>
+    <Name>filter</Name>
+    <Value>1979.166748047</Value>
 </Widget>
 <Widget>
     <Kind>28</Kind>
     <Name>color</Name>
-    <XValue>0.810000002</XValue>
-    <YValue>0.010000000</YValue>
-    <RColor>229</RColor>
+    <XValue>0.653917551</XValue>
+    <YValue>0.050000001</YValue>
+    <RColor>0</RColor>
     <GColor>255</GColor>
-    <BColor>0</BColor>
+    <BColor>6</BColor>
     <AColor>255</AColor>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>rainbow</Name>
+    <Value>0</Value>
+</Widget>
+<Widget>
+    <Kind>25</Kind>
+    <Name>rbspeed</Name>
+    <Value>0.003812500</Value>
 </Widget>
