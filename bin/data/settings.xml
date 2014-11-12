@@ -8,24 +8,24 @@
 <Widget>
     <Kind>25</Kind>
     <Name>size</Name>
-    <Value>9.296875000</Value>
+    <Value>2.229166746</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>fade</Name>
-    <Value>35.859375000</Value>
+    <Value>34.531250000</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>falloff</Name>
-    <Value>0.969375014</Value>
+    <Value>0.990000010</Value>
 </Widget>
 <Widget>
     <Kind>28</Kind>
     <Name>color</Name>
-    <XValue>0.789864719</XValue>
-    <YValue>0.050000001</YValue>
-    <RColor>199</RColor>
+    <XValue>0.726724684</XValue>
+    <YValue>0.000000000</YValue>
+    <RColor>84</RColor>
     <GColor>255</GColor>
     <BColor>0</BColor>
     <AColor>255</AColor>
@@ -33,12 +33,12 @@
 <Widget>
     <Kind>25</Kind>
     <Name>saturation</Name>
-    <Value>0.608333349</Value>
+    <Value>0.875000000</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>brightness</Name>
-    <Value>0.600000024</Value>
+    <Value>0.431250006</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
@@ -48,20 +48,25 @@
 <Widget>
     <Kind>25</Kind>
     <Name>rbspeed</Name>
-    <Value>0.000357812</Value>
+    <Value>0.008968750</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
     <Name>spiral</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>sspeed</Name>
-    <Value>0.174583331</Value>
+    <Value>0.265104175</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
     <Name>baseline</Name>
+    <Value>1</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>bonus</Name>
     <Value>1</Value>
 </Widget>

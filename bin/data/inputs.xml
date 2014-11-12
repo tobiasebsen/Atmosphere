@@ -8,42 +8,42 @@
 <Widget>
     <Kind>25</Kind>
     <Name>distance1</Name>
-    <Value>15776.000000000</Value>
+    <Value>12844.000000000</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>distance2</Name>
-    <Value>15463.999023438</Value>
+    <Value>2588.000000000</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>distance3</Name>
-    <Value>15448.000000000</Value>
+    <Value>3728.000000000</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>distance4</Name>
-    <Value>15132.000000000</Value>
+    <Value>12819.999023438</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>distance5</Name>
-    <Value>14816.000000000</Value>
+    <Value>2892.000000000</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>distance6</Name>
-    <Value>11948.000000000</Value>
+    <Value>1659.999877930</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>distance7</Name>
-    <Value>0.000000000</Value>
+    <Value>2744.000000000</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
     <Name>distance8</Name>
-    <Value>0.000000000</Value>
+    <Value>12452.000000000</Value>
 </Widget>
 <Widget>
     <Kind>25</Kind>
@@ -63,6 +63,6 @@
 <Widget>
     <Kind>6</Kind>
     <Name>range</Name>
-    <HighValue>9062.500000000</HighValue>
-    <LowValue>7083.333007812</LowValue>
+    <HighValue>6979.166992188</HighValue>
+    <LowValue>1666.666748047</LowValue>
 </Widget>

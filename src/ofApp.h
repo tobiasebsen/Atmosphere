@@ -5,8 +5,9 @@
 #include "ofxUI.h"
 #include "ofxArtNet.h"
 #include "ofxTCPClient.h"
+#include "ofxMidi.h"
 
-class ofApp : public ofBaseApp, ofThread {
+class ofApp : public ofBaseApp, ofThread, ofxMidiListener {
 public:
 
     void setup();
@@ -18,6 +19,8 @@ public:
     
     void uiEvent(ofxUIEventArgs & args);
     void artnetPollReply(ofxArtNetNodeEntry* & node);
+    
+    void newMidiMessage(ofxMidiMessage& msg);
 	
 	ofxOscReceiver osc;
     ofxArtNet artnet;
@@ -40,6 +43,7 @@ public:
     ofxUIToggle *spiral;
     ofxUISlider *sspeed;
     ofxUIToggle *baseline;
+    ofxUIToggle *bonus;
     
     ofxUISuperCanvas *server;
     
@@ -50,4 +54,6 @@ public:
     unsigned long long time[10];
     ofFbo fbo;
     ofPixels pixels;
+    
+    ofxMidiIn midi;
 };

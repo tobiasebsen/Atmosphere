@@ -32,6 +32,7 @@ void ofApp::setup(){
     filter = inputs->addMinimalSlider("filter", 0., 20000., 500.);
     range = inputs->addRangeSlider("range", 0., 20000., 800., 5000.);
     inputs->addLabelButton("calibrate", false);
+    inputs->addLabelButton("poll", false);
     inputs->autoSizeToFitWidgets();
     ofAddListener(inputs->newGUIEvent, this, &ofApp::uiEvent);
     inputs->loadSettings("inputs.xml");
@@ -43,7 +44,6 @@ void ofApp::setup(){
     }
 
     settings = new ofxUISuperCanvas("SETTINGS", 240., 20., 200., 200.);
-    settings->addLabelButton("poll", false);
     size = settings->addMinimalSlider("size", 1., 60., 60.);
     fade = settings->addMinimalSlider("fade", 0., 255., 16.);
     falloff = settings->addMinimalSlider("falloff", 0., 0.99, 0.8);
@@ -56,6 +56,7 @@ void ofApp::setup(){
     spiral = settings->addToggle("spiral", true);
     sspeed = settings->addMinimalSlider("sspeed", 0.01, 0.8, 0.03);
     baseline = settings->addToggle("baseline", false);
+    bonus = settings->addToggle("bonus", false);
     settings->autoSizeToFitWidgets();
     ofAddListener(settings->newGUIEvent, this, &ofApp::uiEvent);
     settings->loadSettings("settings.xml");
@@ -80,6 +81,10 @@ void ofApp::setup(){
     fbo.end();
     pixels.allocate(60, 40, OF_PIXELS_RGB);
     
+    midi.listPorts();
+    midi.openPort(0);
+    midi.addListener(this);
+    midi.setVerbose(true);
 }
 
 //--------------------------------------------------------------
@@ -138,7 +143,7 @@ void ofApp::update(){
             value[i] = value[i] * down + (1-down) * n;
     }
     
-    if (bonus) {
+    if (bonus && this->bonus->getValue()) {
         for (int i=0; i<10; i++) {
             value[i] = 0;
         }
@@ -159,7 +164,7 @@ void ofApp::update(){
     if (spiral->getValue()) {
         int n = (int)(ofGetFrameNum() * sspeed->getValue()) % 4;
         for (int i=0; i<10; i++) {
-            ofRect(value[i]*60, i*4+n, size, 1);
+            ofRect(value[i]*59, i*4+n, size, 1);
         }
     }
     else {
@@ -263,4 +268,45 @@ void ofApp::uiEvent(ofxUIEventArgs &args) {
 void ofApp::artnetPollReply(ofxArtNetNodeEntry *&node) {
 
     ofLogNotice() << node->getIp();
+}
+
+void ofApp::newMidiMessage(ofxMidiMessage& msg) {
+    ofLogNotice() << msg.toString();
+    
+    if (msg.status == MIDI_CONTROL_CHANGE) {
+        switch (msg.control) {
+            case 1:
+                range->setValueLow(20000.*msg.value/127.);break;
+            case 2:
+                range->setValueHigh(20000.*msg.value/127.);break;
+            case 3:
+                size->setValue(1+59*msg.value/127.);break;
+            case 4:
+                fade->setValue(1+msg.value*2);break;
+            case 5:
+                falloff->setValue(ofLerp(falloff->getMin(), falloff->getMax(), msg.value/127.));break;
+            case 6:
+                sampler->setValue(ofPoint(msg.value/127.,0.));break;
+            case 7:
+                saturation->setValue(msg.value/127.);break;
+            case 8:
+                brightness->setValue(msg.value/127.);break;
+            case 9:
+                rbspeed->setValue(ofLerp(rbspeed->getMin(), rbspeed->getMax(), msg.value/127.));break;
+            case 10:
+                sspeed->setValue(ofLerp(sspeed->getMin(), sspeed->getMax(), msg.value/127.));break;
+        }
+    }
+    if (msg.status == MIDI_NOTE_ON) {
+        switch (msg.pitch) {
+            case 24:
+                rainbow->toggleValue();break;
+            case 25:
+                spiral->toggleValue();break;
+            case 26:
+                baseline->toggleValue();break;
+            case 27:
+                bonus->toggleValue();break;
+        }
+    }
 }
